@@ -6,6 +6,9 @@ app = Flask(__name__)
 
 # Define multiple log directories
 LOG_DIRS = {
+    'customer_frontend_dev': '/var/log/nginx/frontend',
+    'backend_dev': '/var/log/nginx/backend',
+    'admin_frontend_dev': '/var/log/nginx/admin',
     'nginx': '/var/log/nginx',
     'pm2': '/home/dev/.pm2/logs',
     # Add more directories as needed
@@ -14,9 +17,33 @@ LOG_DIRS = {
 def get_log_files(directory):
     return [f for f in os.listdir(directory) if f.endswith('.log')]
 
+# Add helper function to organize logs by application
+def get_app_logs(app_name):
+    if app_name not in LOG_DIRS:
+        return []
+    return get_log_files(LOG_DIRS[app_name])
+
+# Add new route for application-specific logs
+@app.route('/logs/apps/<app_name>')
+def app_logs(app_name):
+    if app_name not in LOG_DIRS:
+        return jsonify({'error': 'Invalid application'}), 400
+    return jsonify(get_app_logs(app_name))
+
 @app.route('/logs')
 def index():
-    dir_options = ''.join(f'<option value="{dir}">{dir}</option>' for dir in LOG_DIRS.keys())
+    # Group directories by application type
+    app_groups = {
+        'Applications': ['frontend', 'backend', 'admin'],
+        'System': ['nginx', 'pm2']
+    }
+    
+    group_options = ''
+    for group, apps in app_groups.items():
+        group_options += f'<optgroup label="{group}">'
+        group_options += ''.join(f'<option value="{app}">{app}</option>' for app in apps)
+        group_options += '</optgroup>'
+
     initial_dir = list(LOG_DIRS.keys())[0]
     return f'''
     <html>
@@ -27,9 +54,9 @@ def index():
             <h1>Multi-Directory Log Stream Viewer</h1>
             <div class="container">
                 <div class="controls">
-                    <label for="dirSelect">Select Directory:</label>
+                    <label for="dirSelect">Select Application:</label>
                     <select id="dirSelect" onchange="changeDir(this.value)">
-                        {dir_options}
+                        {group_options}
                     </select>
                     <label for="logSelect">Select Log File:</label>
                     <select id="logSelect" onchange="changeLog(this.value)"></select>
@@ -40,8 +67,33 @@ def index():
             <script>
                 var eventSource;
                 var currentDir;
-                function changeDir(dir) {{
+
+                // Function to update URL with current selections
+                function updateURL(dir, log) {{
+                    const params = new URLSearchParams();
+                    if (dir) params.set('dir', dir);
+                    if (log) params.set('log', log);
+                    const newURL = `${{window.location.pathname}}?${{params.toString()}}`;
+                    history.pushState({{ dir, log }}, '', newURL);
+                }}
+
+                // Function to load selections from URL
+                function loadFromURL() {{
+                    const params = new URLSearchParams(window.location.search);
+                    const dir = params.get('dir');
+                    const log = params.get('log');
+                    
+                    if (dir) {{
+                        document.getElementById('dirSelect').value = dir;
+                        changeDir(dir, log);
+                    }} else {{
+                        changeDir('{initial_dir}');
+                    }}
+                }}
+
+                function changeDir(dir, initialLog = null) {{
                     currentDir = dir;
+                    updateURL(dir, null);
                     fetch('/logs/get_logs?dir=' + dir)
                         .then(response => response.json())
                         .then(data => {{
@@ -54,7 +106,9 @@ def index():
                                 logSelect.appendChild(option);
                             }});
                             if (data.length > 0) {{
-                                changeLog(data[0]);
+                                const logToSelect = initialLog || data[0];
+                                logSelect.value = logToSelect;
+                                changeLog(logToSelect);
                             }} else {{
                                 if (eventSource) {{
                                     eventSource.close();
@@ -63,12 +117,14 @@ def index():
                             }}
                         }});
                 }}
+
                 function changeLog(logFile) {{
                     if (eventSource) {{
                         eventSource.close();
                     }}
                     document.getElementById('log').innerHTML = '';
                     if (logFile) {{
+                        updateURL(currentDir, logFile);
                         eventSource = new EventSource(`/logs/stream?dir=${{currentDir}}&log=${{logFile}}`);
                         eventSource.onmessage = function(e) {{
                             let data = e.data;
@@ -80,11 +136,22 @@ def index():
                         }};
                     }}
                 }}
+
                 function clearLog() {{
                     document.getElementById('log').innerHTML = '';
                 }}
-                // Initialize with the first directory
-                changeDir('{initial_dir}');
+
+                // Handle browser back/forward buttons
+                window.onpopstate = function(event) {{
+                    if (event.state) {{
+                        changeDir(event.state.dir, event.state.log);
+                    }} else {{
+                        changeDir('{initial_dir}');
+                    }}
+                }};
+
+                // Initialize from URL parameters
+                loadFromURL();
             </script>
         </body>
     </html>
@@ -103,9 +170,9 @@ def stream():
     directory = request.args.get('dir')
     log_file = request.args.get('log')
     if directory not in LOG_DIRS:
-        return jsonify({'error': 'Invalid Request'}), 400
+        return jsonify({'error': 'Invalid Request, Directory not found'}), 400
     if not log_file or log_file not in get_log_files(LOG_DIRS[directory]):
-        return jsonify({'error': 'Invalid Log File'}), 400
+        return jsonify({'error': 'Invalid Request, Log file not found'}), 400
 
     full_path = os.path.join(LOG_DIRS[directory], log_file)
 
