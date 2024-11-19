@@ -6,10 +6,10 @@ app = Flask(__name__)
 
 # Define multiple log directories
 LOG_DIRS = {
-    'customer_frontend_dev': '/var/log/nginx/frontend',
-    'backend_dev': '/var/log/nginx/backend',
-    'admin_frontend_dev': '/var/log/nginx/admin',
-    'nginx': '/var/log/nginx',
+    'frontend': '/home/dev/logs/frontend',
+    'backend': '/home/dev/logs/backend',
+    'admin': '/home/dev/logs/admin',
+    'nginx': '/home/dev/logs/nginx',
     'pm2': '/home/dev/.pm2/logs',
     # Add more directories as needed
 }
