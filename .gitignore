@@ -1,0 +1,18 @@
+*.log
+*.venv
+*.lock
+*.db
+*.sqlite3
+*.sqlite
+*.db
+
+# python
+__pycache__/
+*.pyc
+
+# venv
+.venv/
+
+# virtual environment
+.env/
+
