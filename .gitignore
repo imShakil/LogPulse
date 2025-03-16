@@ -14,7 +14,7 @@ __pycache__/
 .venv/
 
 # virtual environment
-.env/
+.env
 
 testdata/
 logs/
