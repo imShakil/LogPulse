@@ -77,7 +77,7 @@ def local_authenticate(email, password):
         logger.warning(f"Invalid credentials for local user: {email}")
     return None
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/auth/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form.get('username')
@@ -119,7 +119,7 @@ def login():
         flash('Invalid email or password')
     return render_template('login.html')
 
-@auth_bp.route('/logout')
+@auth_bp.route('/auth/logout')
 @login_required
 def logout():
     session.pop('user_data', None)
