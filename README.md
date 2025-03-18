@@ -8,9 +8,7 @@ A Flask-based web application for real-time log monitoring and management across
 - Multi-directory log monitoring
 - Secure authentication (Local DB and/or API)
 - Download logs functionality
-- Clean and responsive UI
 - Session management
-- URL-based navigation
 
 ## Prerequisites
 
@@ -124,10 +122,8 @@ reporting/
 
 ## Security Considerations
 
+- Secure log access
 - Use HTTPS in production
-- Change default admin credentials
-- Set a strong SECRET_KEY
-- Properly configure file permissions for log directories
 - Use environment variables for sensitive data
 
 ## License
