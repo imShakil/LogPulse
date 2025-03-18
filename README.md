@@ -86,7 +86,8 @@ Note: The application includes a PM2 ecosystem configuration file [`ecosystem.co
 
 1. Local Database (MODE 0)
    - Uses PostgreSQL for user authentication
-   - Default admin credentials: username: admin, password: admin123
+   - Requires database configuration
+   - Default user: `admin`, password: `admin123` if no password is set on environment variable
 
 2. API Authentication (MODE 1)
    - Uses external API for authentication
