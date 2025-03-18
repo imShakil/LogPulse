@@ -100,7 +100,7 @@ Note: The application includes a PM2 ecosystem configuration file [`ecosystem.co
 ## Directory Structure
 
 ```plaintext
-reporting/
+LogPulse/
 ├── auth/
 │   └── auth.py
 ├── services/
