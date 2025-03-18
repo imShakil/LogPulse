@@ -23,8 +23,8 @@ A Flask-based web application for real-time log monitoring and management across
 1. Clone the repository:
 
     ```bash
-    git clone <repository-url>
-    cd reporting
+    git clone https://github.com/imShakil/LogPulse.git
+    cd LogPulse
     ```
 
 2. Create and activate a virtual environment:
@@ -48,13 +48,41 @@ A Flask-based web application for real-time log monitoring and management across
 
 ## Running the Application
 
-1. Start the Flask application:
+1. Using Python directly:
 
     ```bash
     python report.py
     ```
 
-2. Access the application in your web browser at ess the application in your web browser at `http://localhost:5000`
+2. Using PM2 (Recommended for production):
+
+    ```bash
+    # Install PM2 if not installed
+    npm install pm2 -g
+
+    # Start using ecosystem config
+    pm2 start ecosystem.config.js
+
+    # Other useful PM2 commands
+    pm2 status                  # Check application status
+    pm2 logs logpulse          # View logs
+    pm2 restart logpulse       # Restart application
+    pm2 stop logpulse          # Stop application
+    pm2 delete logpulse        # Remove from PM2
+
+    # For production environment
+    pm2 start ecosystem.config.js --env production
+    ```
+
+3. Access the application in your web browser at `http://localhost:5000`
+
+Note: The application includes a PM2 ecosystem configuration file [`ecosystem.config.js`](./ecosystem.config.js) that handles:
+
+- Python interpreter settings
+- Instance management
+- Auto-restart capability
+- Memory limits
+- Environment-specific configurations
 
 ## Authentication Modes
 
@@ -91,7 +119,7 @@ reporting/
 │   └── log_viewer.html
 ├── .env
 ├── requirements.txt
-└── report.py
+└── logpulse.py
 ```
 
 ## Security Considerations
@@ -102,4 +130,6 @@ reporting/
 - Properly configure file permissions for log directories
 - Use environment variables for sensitive data
 
-## Licese
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) for details.
