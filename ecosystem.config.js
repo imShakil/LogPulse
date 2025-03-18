@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
-    name: 'reporting-app',
-    script: 'report.py',
+    name: 'logpulse',
+    script: 'logpulse.py',
     interpreter: 'python3',
     instances: 1,
     autorestart: true,
