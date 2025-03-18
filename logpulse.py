@@ -96,7 +96,7 @@ def create_admin_user():
         if not User.query.filter_by(username='admin').first():
             logger.info("Creating initial admin user")
             admin = User(username='admin')
-            admin.set_password('admin123')  # Change this password
+            admin.set_password(str(os.getenv('ADMIN_PASS', 'admin123')))  # Change this password
             db.session.add(admin)
             db.session.commit()
 
